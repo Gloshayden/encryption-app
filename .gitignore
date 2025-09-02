@@ -1,0 +1,5 @@
+venv/
+settings.json
+key.key
+__pycache__/
+files/
