@@ -1,5 +1,8 @@
 # Encryption app
 This is an app that i made to encrypt different files
-So far this is incomplete but the final release is planned to have these features:
-- File previews
-- theme changing
+The core app is complete and has the basic features of regenerating the key, encrypting and decrypting files.
+
+## TODO
+- [ ] File previews
+- [ ] Theme changing
+- [ ] Changing the files directory
