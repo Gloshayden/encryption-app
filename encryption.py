@@ -8,15 +8,21 @@ def initdecryption(KeyInfo):
     global cipher_suite
     cipher_suite = Fernet(key)
 
+def checkIfEncrypted(FileName):
+    with open(FileName,"rb") as f:
+        file = f.read()
+    try:
+        cipher_suite.decrypt(file)
+        return True
+    except InvalidToken:
+        return False
+
 def encryptFile(FileName):
     with open(FileName,"rb") as f:
         Original = f.read()
     encoded_file = cipher_suite.encrypt(Original)
-    try:
-        cipher_suite.decrypt(Original)
-        return "not encrypted"
-    except InvalidToken:
-        pass
+    if checkIfEncrypted(FileName):
+        return "already encrypted"
     with open(FileName,"wb") as f:
         f.write(encoded_file)
     return "encrypted"
@@ -24,10 +30,9 @@ def encryptFile(FileName):
 def decryptFile(FileName):
     with open(FileName,"rb") as f:
         Encrypted = f.read()
-    try:
-        decoded_file = cipher_suite.decrypt(Encrypted)
-    except InvalidToken:
-        return "not decrypted"
+    if not checkIfEncrypted(FileName):
+        return "encrypted"
+    decoded_file = cipher_suite.decrypt(Encrypted)
     with open(FileName,"wb") as f:
         f.write(decoded_file)
     return "decrypted"

@@ -1,6 +1,6 @@
 import os, encryption, json, hashlib
 import FreeSimpleGUI as sg
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, InvalidToken
 
 def askForPassword(password) -> bool:
     layout = [  [sg.Text("Please enter your password")],
@@ -90,10 +90,33 @@ def main():
         elif values != {0: []}:
             window.close()
             file = values[0][0]
-            layout = [  [sg.Text("What do you want to do with this file?")],
-                        [sg.Text("File: " + file)],
-                        [sg.Button("Encrypt"),sg.Button("Decrypt"), sg.Button("Back")]]
-            window = sg.Window('Please pick a file', layout)
+            FileName, FileExt = os.path.splitext(file)
+            FileExt = FileExt.lower()
+            if FileExt == ".png" or FileExt == ".gif":
+                if encryption.checkIfEncrypted("files/"+file):
+                    layout = [  [sg.Text("What do you want to do with this file?")],
+                                [sg.Text("File: " + file)],
+                                [sg.Button("Encrypt"),sg.Button("Decrypt"),sg.Button("Back")]]
+                else:
+                    layout = [  [sg.Text("What do you want to do with this file?")],
+                                [sg.Text("File: " + file)],
+                                [sg.Image("files/"+file)],
+                                [sg.Button("Encrypt"),sg.Button("Decrypt"),sg.Button("Back")]]
+            elif FileExt == ".txt":
+                if encryption.checkIfEncrypted("files/"+file):
+                    layout = [  [sg.Text("What do you want to do with this file?")],
+                                [sg.Text("File: " + file)],
+                                [sg.Button("Encrypt"),sg.Button("Decrypt"),sg.Button("Back")]]
+                else:
+                    layout = [  [sg.Text("What do you want to do with this file?")],
+                                [sg.Text("File: " + file)],
+                                [sg.Multiline(default_text=open("files/"+file,"r").read(), size=(30,5), disabled=True)],
+                                [sg.Button("Encrypt"),sg.Button("Decrypt"),sg.Button("Back")]]
+            else:
+                layout = [  [sg.Text("What do you want to do with this file?")],
+                            [sg.Text("File: " + file)],
+                            [sg.Button("Encrypt"),sg.Button("Decrypt"), sg.Button("Back")]]
+            window = sg.Window('Please pick an option', layout)
             event, values = window.read()
             window.close()
             if event == "Encrypt":
