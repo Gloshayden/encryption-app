@@ -43,11 +43,13 @@ def main():
         settings = json.load(f)
     password = settings["password"]
 
+    folder = "files"
+    files = os.listdir("files")
     while True:
-        files = os.listdir("files")
-        layout = [  [sg.Text("Please select the file you want to encrypt or decrypt")],
+        layout = [  [sg.Text('Folder'), sg.In(size=(30,1), default_text=folder, focus=False, enable_events=True, key='-FOLDER-'), sg.FolderBrowse()],
+                    [sg.Text("Please select the file you want to encrypt or decrypt")],
                     [sg.Listbox(values=files, size=(50,20), select_mode="LISTBOX_SELECT_MODE_SINGLE", bind_return_key=True)],
-                    [sg.Button("Regenerate Key", key="key"),sg.Button("Refresh") ,sg.Button("Exit")]]
+                    [sg.Button("Regenerate Key", key="key"),sg.Button("Refresh"),sg.Button("Exit")]]
         window = sg.Window('Please pick a file', layout)
         event, values = window.read()
         if event == sg.WIN_CLOSED or event == "Exit":
@@ -58,6 +60,13 @@ def main():
             window.close()
             continue
 
+        elif event == "-FOLDER-":
+            window.close()
+            folder = values['-FOLDER-']
+            files = os.listdir(folder) 
+            for file in files:
+                if os.path.isdir(f"{folder}/{file}"):
+                    files.remove(file)
         elif event == "key":
             window.close()
             layout = [  [sg.Text("Are you sure you want to regenerate the key?")],
