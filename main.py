@@ -1,6 +1,6 @@
 import os, encryption, json, hashlib
 import FreeSimpleGUI as sg
-from cryptography.fernet import Fernet, InvalidToken
+from cryptography.fernet import Fernet
 
 def askForPassword(password) -> bool:
     layout = [  [sg.Text("Please enter your password")],
@@ -16,7 +16,32 @@ def askForPassword(password) -> bool:
     else:
         return False
 
-def main():
+def changeTheme() -> None:
+    loop = True
+    theme = ""
+    while loop:
+        layout = [  [sg.Text("What theme do you want to change to?")],
+                    [sg.Listbox(values=sg.theme_list(), size=(50,20), select_mode="LISTBOX_SELECT_MODE_SINGLE", bind_return_key=True)],
+                    [sg.Button("Back"), sg.Button("Confirm")]]
+        window = sg.Window("Pick a theme", layout)
+        event, values = window.read()
+        if event == "Back":
+            window.close()
+            loop = False
+        elif values != {0: []}:
+            window.close()
+            theme = values[0][0]
+            sg.theme(theme)
+        elif "Confirm":
+            if theme != "":
+                window.close()
+                return theme
+            else:
+                window.close()
+                sg.popup("Please select a theme")
+    
+
+def main() -> None:
     if not os.path.exists("files"): os.mkdir("files")
     if not os.path.exists("settings.json"):
         layout = [  [sg.Text("please enter in a password")],
@@ -27,7 +52,8 @@ def main():
         event, values = window.read()
         password = values[0]
         window.close()
-        settings = {"password":hashlib.sha256(password.encode()).hexdigest()}
+        theme = changeTheme()
+        settings = {"password":hashlib.sha256(password.encode()).hexdigest(), "theme":theme}
         with open("settings.json","w") as file:
             json.dump(settings, file)
     if not os.path.exists("key.key"):
@@ -42,14 +68,16 @@ def main():
     with open("settings.json","r") as f:
         settings = json.load(f)
     password = settings["password"]
+    theme = settings["theme"]
 
-    folder = "files"
-    files = os.listdir("files")
+    folder: str = "files"
+    files: dict = os.listdir("files")
+    sg.theme(theme)
     while True:
         layout = [  [sg.Text('Folder'), sg.In(size=(30,1), default_text=folder, focus=False, enable_events=True, key='-FOLDER-'), sg.FolderBrowse()],
                     [sg.Text("Please select the file you want to encrypt or decrypt")],
                     [sg.Listbox(values=files, size=(50,20), select_mode="LISTBOX_SELECT_MODE_SINGLE", bind_return_key=True)],
-                    [sg.Button("Regenerate Key", key="key"),sg.Button("Refresh"),sg.Button("Exit")]]
+                    [sg.Button("Regenerate Key", key="key"),sg.Button("Refresh"),sg.Button("Exit"), sg.Button("Change Theme", key="theme")]]
         window = sg.Window('Please pick a file', layout)
         event, values = window.read()
         if event == sg.WIN_CLOSED or event == "Exit":
@@ -59,6 +87,11 @@ def main():
         elif event == "Refresh":
             window.close()
             continue
+
+        elif event == "theme":
+            window.close()
+            theme = changeTheme()
+            settings = {"password":password, "theme":theme}
 
         elif event == "-FOLDER-":
             window.close()
