@@ -76,7 +76,7 @@ def main() -> None:
     while True:
         layout = [  [sg.Text('Folder'), sg.In(size=(30,1), default_text=folder, focus=False, enable_events=True, key='-FOLDER-'), sg.FolderBrowse()],
                     [sg.Text("Please select the file you want to encrypt or decrypt")],
-                    [sg.Listbox(values=files, size=(50,20), select_mode="LISTBOX_SELECT_MODE_SINGLE", bind_return_key=True)],
+                    [sg.Listbox(values=files, size=(50,21), select_mode="LISTBOX_SELECT_MODE_SINGLE", bind_return_key=True)],
                     [sg.Button("Regenerate Key", key="key"),sg.Button("Refresh"),sg.Button("Exit"), sg.Button("Change Theme", key="theme")]]
         window = sg.Window('Please pick a file', layout)
         event, values = window.read()
