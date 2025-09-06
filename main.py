@@ -63,10 +63,15 @@ def main():
         elif event == "-FOLDER-":
             window.close()
             folder = values['-FOLDER-']
-            files = os.listdir(folder) 
-            for file in files:
-                if os.path.isdir(f"{folder}/{file}"):
-                    files.remove(file)
+            try:
+                files = os.listdir(folder) 
+                for file in files:
+                    if os.path.isdir(f"{folder}/{file}"):
+                        files.remove(file)
+            except FileNotFoundError:
+                sg.popup("The folder Does not exist please try again")
+                continue
+
         elif event == "key":
             window.close()
             layout = [  [sg.Text("Are you sure you want to regenerate the key?")],
@@ -99,27 +104,28 @@ def main():
         elif values != {0: []}:
             window.close()
             file = values[0][0]
+            folder = values["-FOLDER-"]
             FileName, FileExt = os.path.splitext(file)
             FileExt = FileExt.lower()
             if FileExt == ".png" or FileExt == ".gif":
-                if encryption.checkIfEncrypted("files/"+file):
+                if encryption.checkIfEncrypted(f"{folder}/{file}"):
                     layout = [  [sg.Text("What do you want to do with this file?")],
                                 [sg.Text("File: " + file)],
                                 [sg.Button("Encrypt"),sg.Button("Decrypt"),sg.Button("Back")]]
                 else:
                     layout = [  [sg.Text("What do you want to do with this file?")],
                                 [sg.Text("File: " + file)],
-                                [sg.Image("files/"+file)],
+                                [sg.Image(f"{folder}/{file}")],
                                 [sg.Button("Encrypt"),sg.Button("Decrypt"),sg.Button("Back")]]
             elif FileExt == ".txt":
-                if encryption.checkIfEncrypted("files/"+file):
+                if encryption.checkIfEncrypted(f"{folder}/{file}"):
                     layout = [  [sg.Text("What do you want to do with this file?")],
                                 [sg.Text("File: " + file)],
                                 [sg.Button("Encrypt"),sg.Button("Decrypt"),sg.Button("Back")]]
                 else:
                     layout = [  [sg.Text("What do you want to do with this file?")],
                                 [sg.Text("File: " + file)],
-                                [sg.Multiline(default_text=open("files/"+file,"r").read(), size=(30,5), disabled=True)],
+                                [sg.Multiline(default_text=open(f"{folder}/{file}","r").read(), size=(30,5), disabled=True)],
                                 [sg.Button("Encrypt"),sg.Button("Decrypt"),sg.Button("Back")]]
             else:
                 layout = [  [sg.Text("What do you want to do with this file?")],
@@ -129,7 +135,7 @@ def main():
             event, values = window.read()
             window.close()
             if event == "Encrypt":
-                result = encryption.encryptFile("files/"+file)
+                result = encryption.encryptFile(f"{folder}/{file}")
                 if result == "encrypted":
                     sg.popup("File encrypted")
                 else:
@@ -137,7 +143,7 @@ def main():
             elif event == "Decrypt":
                 PassCheck = askForPassword(password)
                 if PassCheck == True:
-                    result = encryption.decryptFile("files/"+file)
+                    result = encryption.decryptFile(f"{folder}/{file}")
                     if result == "decrypted":
                         sg.popup("File decrypted")
                     else:
